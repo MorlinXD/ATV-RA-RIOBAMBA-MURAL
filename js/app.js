@@ -1,19 +1,40 @@
-const isIOS =
-  /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isIOS = (() => {
+
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (
+      navigator.platform === "MacIntel" &&
+      navigator.maxTouchPoints > 1
+    )
+  );
+
+})();
+
+console.log("🍎 iOS:", isIOS);
 
 let sceneData = null;
 
 let activeAnimation = null;
 
+// ======================================
+// INIT
+// ======================================
+
 window.addEventListener("DOMContentLoaded", async () => {
 
-  const response = await fetch("./scene.json");
+  const response = await fetch(
+    `./scene.json?v=${Date.now()}`
+  );
 
   sceneData = await response.json();
 
   initTargets();
 
 });
+
+// ======================================
+// TARGETS
+// ======================================
 
 function initTargets() {
 
@@ -29,21 +50,23 @@ function initTargets() {
 
       clearTargets();
 
-      if (isIOS) {
+      await loadVideo(target, config);
 
-        await loadSequence(target, config);
+    });
 
-      } else {
+    target.addEventListener("targetLost", () => {
 
-        await loadVideo(target, config);
-
-      }
+      cancelAnimationFrame(activeAnimation);
 
     });
 
   });
 
 }
+
+// ======================================
+// CLEAR
+// ======================================
 
 function clearTargets() {
 
@@ -57,17 +80,45 @@ function clearTargets() {
 
     });
 
+  // eliminar videos viejos
+  document
+    .querySelectorAll("video[data-ar-video]")
+    .forEach((video) => {
+
+      video.pause();
+
+      video.remove();
+
+    });
+
 }
 
 // ======================================
-// VIDEO ANDROID
+// VIDEO
 // ======================================
 
 async function loadVideo(target, config) {
 
+  const source = isIOS
+    ? config.ios.src
+    : config.android.src;
+
+  console.log("🎬 SOURCE:", source);
+
+  // ======================================
+  // VIDEO ELEMENT
+  // ======================================
+
   const video = document.createElement("video");
 
-  video.src = config.android.src;
+  video.id = `video-${config.id}`;
+
+  video.setAttribute(
+    "data-ar-video",
+    "true"
+  );
+
+  video.src = `${source}?v=${Date.now()}`;
 
   video.crossOrigin = "anonymous";
 
@@ -75,146 +126,143 @@ async function loadVideo(target, config) {
 
   video.muted = true;
 
+  video.autoplay = true;
+
   video.playsInline = true;
+
+  video.preload = "auto";
 
   video.setAttribute(
     "webkit-playsinline",
     "true"
   );
 
-  await video.play().catch(() => {});
-
-  const videoEntity =
-    document.createElement("a-video");
-
-  videoEntity.setAttribute("src", video.src);
-
-  videoEntity.setAttribute(
-    "width",
-    config.width || 5
+  video.setAttribute(
+    "playsinline",
+    "true"
   );
 
-  videoEntity.setAttribute(
-    "height",
-    config.height || 7
-  );
+  // ocultar video HTML
+  video.style.position = "fixed";
 
-  videoEntity.setAttribute(
-    "position",
-    "0 0 0"
-  );
+  video.style.opacity = "0";
 
-  target.appendChild(videoEntity);
+  video.style.pointerEvents = "none";
 
-}
+  video.style.width = "1px";
 
-// ======================================
-// SEQUENCE IOS
-// ======================================
+  video.style.height = "1px";
 
-async function loadSequence(target, config) {
+  // ======================================
+  // ADD TO DOM
+  // ======================================
 
-  const sequence = config.ios;
+  document.body.appendChild(video);
 
-  const canvas = document.createElement("canvas");
+  // ======================================
+  // WAIT VIDEO READY
+  // ======================================
 
-  canvas.width = 1024;
+  await new Promise((resolve, reject) => {
 
-  canvas.height = 1024;
+    video.onloadeddata = () => {
 
-  const ctx = canvas.getContext("2d");
+      console.log("✅ VIDEO READY");
 
-  const texture =
-    new THREE.CanvasTexture(canvas);
+      resolve();
 
-  const plane =
-    document.createElement("a-plane");
+    };
 
-  plane.setAttribute(
-    "width",
-    config.width || 5
-  );
+    video.onerror = (e) => {
 
-  plane.setAttribute(
-    "height",
-    config.height || 7
-  );
+      console.error(
+        "❌ VIDEO ERROR",
+        e
+      );
 
-  plane.setAttribute(
-    "position",
-    "0 0 0"
-  );
+      reject(e);
 
-  target.appendChild(plane);
+    };
 
-  let frame = 1;
+  });
 
-  async function animate() {
+  // ======================================
+  // PLAY
+  // ======================================
 
-    const num =
-      String(frame).padStart(4, "0");
-
-    const imagePath =
-      `${sequence.path}/frame_${num}.${sequence.extension}`;
-
-    const img = new Image();
-
-    img.src = imagePath;
+  const playVideo = async () => {
 
     try {
 
-      await img.decode();
+      await video.play();
 
-      ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-      ctx.drawImage(
-        img,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-      texture.needsUpdate = true;
-
-      const mesh =
-        plane.getObject3D("mesh");
-
-      if (mesh) {
-
-        mesh.material.map = texture;
-
-        mesh.material.transparent = true;
-
-        mesh.material.needsUpdate = true;
-
-      }
-
-      frame++;
-
-      if (frame > sequence.frames) {
-        frame = 1;
-      }
-
-      activeAnimation =
-        requestAnimationFrame(animate);
+      console.log("▶️ PLAYING");
 
     } catch (err) {
 
       console.error(
-        "❌ Frame error:",
-        imagePath
+        "❌ PLAY ERROR",
+        err
       );
 
     }
 
-  }
+  };
 
-  animate();
+  await playVideo();
+
+  document.body.addEventListener(
+    "touchstart",
+    playVideo,
+    { once: true }
+  );
+
+  // ======================================
+  // AFRAME VIDEO
+  // ======================================
+
+  const videoEntity =
+    document.createElement("a-video");
+
+  videoEntity.setAttribute(
+    "src",
+    `#${video.id}`
+  );
+
+  videoEntity.setAttribute(
+    "width",
+    config.width || 5
+  );
+
+  videoEntity.setAttribute(
+    "height",
+    config.height || 7
+  );
+
+  videoEntity.setAttribute(
+    "position",
+    "0 0 0"
+  );
+
+  videoEntity.setAttribute(
+    "material",
+    "shader: flat"
+  );
+
+  // ======================================
+  // TRANSPARENCIA IOS
+  // ======================================
+
+  videoEntity.setAttribute(
+    "transparent",
+    "true"
+  );
+
+  videoEntity.setAttribute(
+    "alpha-test",
+    "0.01"
+  );
+
+  target.appendChild(videoEntity);
 
 }

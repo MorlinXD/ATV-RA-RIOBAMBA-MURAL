@@ -12,10 +12,7 @@
       },
 
       "ios": {
-        "type": "sequence",
-        "path": "./assets/pajaro_derecha",
-        "frames": 237,
-        "extension": "webp"
+        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroderechosinfondo.mp4"
       },
 
       "width": 5,
@@ -33,10 +30,7 @@
       },
 
       "ios": {
-        "type": "sequence",
-        "path": "./assets/pajaro_izquierda",
-        "frames": 180,
-        "extension": "webp"
+        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroizquierdosinfondo.mp4"
       },
 
       "width": 5,
@@ -54,10 +48,7 @@
       },
 
       "ios": {
-        "type": "sequence",
-        "path": "./assets/riobamba",
-        "frames": 180,
-        "extension": "webp"
+        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/Riobambasinfondo2.mp4"
       },
 
       "width": 5,
@@ -75,10 +66,7 @@
       },
 
       "ios": {
-        "type": "sequence",
-        "path": "./assets/riobamba",
-        "frames": 180,
-        "extension": "webp"
+        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/Riobambasinfondo2.mp4"
       },
 
       "width": 5,
