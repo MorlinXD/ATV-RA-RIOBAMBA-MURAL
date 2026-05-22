@@ -12,7 +12,7 @@
       },
 
       "ios": {
-        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroderechosinfondo.mp4"
+        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroderechorecortado.mp4"
       },
 
       "width": 5,
@@ -30,7 +30,7 @@
       },
 
       "ios": {
-        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroizquierdosinfondo.mp4"
+        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroizquierdorecortado.mp4"
       },
 
       "width": 5,
