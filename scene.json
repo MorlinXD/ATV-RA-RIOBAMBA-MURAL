@@ -15,8 +15,8 @@
         "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroderechorecortado.mp4"
       },
 
-      "width": 5,
-      "height": 7
+      "width": 3,
+      "height": 4
     },
 
     {
@@ -30,11 +30,11 @@
       },
 
       "ios": {
-        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroizquierdorecortado.mp4"
+        "src": "https://kubox-ar-assets.s3.us-east-1.amazonaws.com/pajaroizquierdarecortado.mp4"
       },
 
-      "width": 5,
-      "height": 7
+      "width": 3,
+      "height": 4
     },
 
     {
